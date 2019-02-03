@@ -25,7 +25,7 @@ def soduku_board(filename):
         col = x % 9
         return [row,col]
 
-    def get_node_options(soduku_cells_filled):
+    def create_next_node(soduku_cells_filled):
         pos = placement(soduku_cells_filled)
 
         #return fixed numbers
@@ -45,14 +45,14 @@ def soduku_board(filename):
 
         soduku_nodes.append(list(set(list(np.unique(col)) + list(np.unique(row)) + list(np.unique(block)))))
 
-    def is_legal(node):
-        if (soduku_entry_left[node[-1]] - 1) >= 0:
+    def is_legal(soduku_nodes):
+        if (soduku_nodes[-1][-1] - 1) >= 0:
             return True
         else:
             return False
 
 
-    def solve(node):
+    def solve(soduku_nodes):
 
         if is_legal(soduku_nodes[soduku_cells_filled]):
             variable_map[node cell] = node[-1]
@@ -64,7 +64,7 @@ def soduku_board(filename):
                 return variable_map
             #else keep going
             else:
-                solve(get_node_options(soduku_nodes[soduku_cells_filled]))
+                solve(create_next_node(soduku_nodes[soduku_cells_filled]))
 
         #if entry in next node is illegal
         if !is_legal(node):
@@ -73,21 +73,31 @@ def soduku_board(filename):
             node = node[:-1]
             #if node is empty after removing entry
             if len(node) == 0:
-                #return value of prior cell to dictionary count
+
+
+                #return value of prior cell to dictionary count, reset variable map
+                variable_map[placement(soduku_cells_filled)] = 0
                 soduku_entry_left[soduku_nodes[soduku_cells_filled - 1][-1]] += 1
 
+                #remove current node from soduku_nodes,
                 #alter prior node and remove tail of list
-                soduku_nodes[soduku_cells_filled - 1] = soduku_nodes[soduku_cells_filled - 1][:-1]
+                soduku_nodes = soduku_nodes[:-1]
+                soduku_nodes[-1] = soduku_nodes[:-1]
 
-                #back track node
+                #back track soduku_cells_filled count and try again
                 soduku_cells_filled += -1
-                solve(soduku_nodes[soduku_cells_filled - 1])
+                solve(soduku_nodes)
 
 
             else:
-                solve(soduku_nodes[soduku_cells_filled])
+                solve(soduku_nodes)
 
     soduku_cells_filled = 0
-    get_node_options
+
     #initialize first soduku_node
+    first_node = create_next_node(0)
+
+    #lets try solving this
     solve(first_node)
+
+    
