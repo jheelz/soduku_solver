@@ -1,103 +1,115 @@
 import numpy as np
 
+
 '''
-class entry(row, col):
-
-    self.row = row
-    self.col = col
-
-    self.legal_moves = soduku.
+    >>> def string_parse(x):
+    ...     string = ''
+    ...     for char in x:
+    ...             string += char + ' '
+    ...     return string[:-1]
 '''
-#inspired by depth search algorithm
 
-def soduku_board(filename):
+def placement(x):
+    row = (x + 9)/9 - 1
+    col = x % 9
+    return [row,col]
 
-    fixed_map = np.read(filename)
-    variable_map = np.zeros((9,9)) + fixed_map
+def create_next_node(soduku_cells_filled):
+    pos = placement(soduku_cells_filled)
+    #return fixed numbers
+    if fixed_map[pos[0],pos[1]] <> 0:
+        return [fixed_map[pos[0],pos[1]]]
+    col = variable_map[:, pos[1]]
 
-    soduku_entrys_left = {0:9, 1:9, 2:9, 3:9, 4:9, 5:9, 6:9, 7:9, 8:9, 9:9}
+    #get nums taken in row
+    row = variable_map[pos[0], :]
 
-    soduku_nodes = {}
+    #get nums taken in block
+    block_row = pos[0] / 3
+    block_column = pos[1] / 3
 
-    #helper function to get matrix position of integer (0 -> [0,0], 9 -> [1,0])
-    def placement(x):
-        row = (x + 9)/9 - 1
-        col = x % 9
-        return [row,col]
+    block = variable_map[block_row * 3 : block_row * 3 + 3, block_column * 3 : block_column * 3 + 3]
+    return list(numbers - set(list(np.unique(col)) + list(np.unique(row)) + list(np.unique(block))))
 
-    def create_next_node(soduku_cells_filled):
-        pos = placement(soduku_cells_filled)
+def is_legal(soduku_node):
+    if len(soduku_node) == 0:
+        return False
+    elif(soduku_entrys_left[soduku_node[-1]] >= 0):
+        return True
+    else:
+        return False
 
-        #return fixed numbers
-        if fixed_map[pos] <> 0:
-            return [fixed_map[pos]]
+numbers = set([1,2,3,4,5,6,7,8,9])
 
-        col = variable_map[:, pos[1]]
+fixed_map = np.array([[0,0,3,0,2,0,6,0,0],
+    [9,0,0,3,0,5,0,0,1],
+    [0,0,1,8,0,6,4,0,0],
+    [0,0,8,1,0,2,9,0,0],
+    [7,0,0,0,0,0,0,0,8],
+    [0,0,6,7,0,8,2,0,0],
+    [0,0,2,6,0,9,5,0,0],
+    [8,0,0,2,0,3,0,0,9],
+    [0,0,5,0,1,0,3,0,0]])
 
-        #get nums taken in row
-        row = variable_map[pos[0], :]
+variable_map = np.zeros((9,9)) + fixed_map
 
-        #get nums taken in block
-        block_row = pos[0] / 3
-        block_column = pos[1] / 3
-
-        block = variable_map[block_row * 2 : block_row * 2 + 2, block_column * 2 : block_column * 2 + 2]
-
-        soduku_nodes.append(list(set(list(np.unique(col)) + list(np.unique(row)) + list(np.unique(block)))))
-
-    def is_legal(soduku_nodes):
-        if (soduku_nodes[-1][-1] - 1) >= 0:
-            return True
-        else:
-            return False
+soduku_entrys_left = {1:9, 2:9, 3:9, 4:9, 5:9, 6:9, 7:9, 8:9, 9:9}
 
 
-    def solve(soduku_nodes):
+soduku_nodes = []
 
-        if is_legal(soduku_nodes[soduku_cells_filled]):
-            variable_map[node cell] = node[-1]
-            soduku_entry_left[soduku_nodes[soduku_cells_filled][-1]] += -1
+for i in range(0, 9):
+    for j in range(0,9):
+        if fixed_map[i,j] != 0:
+            soduku_entrys_left[int(fixed_map[i,j])] += -1
+
+print soduku_entrys_left
+soduku_nodes.append(create_next_node(0))
+soduku_cells_filled = 0
+
+
+while soduku_cells_filled < 81:
+
+    #FIX BUG THAT DOESNT LET [8,8] GET POPULATED
+    #ANNOYING BUT IT WORKS
+    if soduku_cells_filled == 80:
+        for key, value in soduku_entrys_left.items():
+            if value > 0:
+
+                variable_map[8,8] = key
+        print variable_map
+        break
+
+    if is_legal(soduku_nodes[soduku_cells_filled]):
+            pos = placement(soduku_cells_filled)
+
+            variable_map[pos[0], pos[1]] = soduku_nodes[soduku_cells_filled][-1]
+
+            #print variable_map
+            if fixed_map[pos[0], pos[1]] == 0:
+                soduku_entrys_left[soduku_nodes[soduku_cells_filled][-1]] += -1
+
             soduku_cells_filled += 1
 
-            #solved!
-            if soduku_puzzle_size == 80:
-                return variable_map
-            #else keep going
-            else:
-                solve(create_next_node(soduku_nodes[soduku_cells_filled]))
+            x = create_next_node(soduku_cells_filled)
+            soduku_nodes.append(x)
 
-        #if entry in next node is illegal
-        if !is_legal(node):
-            #remove entry
+    elif ~is_legal(soduku_nodes[soduku_cells_filled]):
+        #remove entry
+        soduku_nodes[soduku_cells_filled] = soduku_nodes[soduku_cells_filled][:-1]
 
-            node = node[:-1]
-            #if node is empty after removing entry
-            if len(node) == 0:
+        while len(soduku_nodes[-1]) == 0:
+            #back track nodes if child node is empty
+            soduku_nodes = soduku_nodes[:-1]
+            soduku_cells_filled += -1
 
+            #get coordinates of placement
+            pos = placement(soduku_cells_filled)
 
-                #return value of prior cell to dictionary count, reset variable map
-                variable_map[placement(soduku_cells_filled)] = 0
-                soduku_entry_left[soduku_nodes[soduku_cells_filled - 1][-1]] += 1
+            if fixed_map[pos[0], pos[1]] == 0:
 
-                #remove current node from soduku_nodes,
-                #alter prior node and remove tail of list
-                soduku_nodes = soduku_nodes[:-1]
-                soduku_nodes[-1] = soduku_nodes[:-1]
-
-                #back track soduku_cells_filled count and try again
-                soduku_cells_filled += -1
-                solve(soduku_nodes)
+                variable_map[pos[0], pos[1]] = 0
+                soduku_entrys_left[soduku_nodes[soduku_cells_filled][-1]] += 1
 
 
-            else:
-                solve(soduku_nodes)
-
-    soduku_cells_filled = 0
-
-    #initialize first soduku_node
-    first_node = create_next_node(0)
-
-    #lets try solving this
-    solve(first_node)
-
-    
+            soduku_nodes[-1] = soduku_nodes[-1][:-1]
