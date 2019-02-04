@@ -1,7 +1,13 @@
 import numpy as np
 import time
+import os
+
 
 start = time.time()
+
+#create subdirectory to house solutions
+if not os.path.exists('solutions'):
+    os.makedirs('solutions')
 
 #read in sodukus from textfile
 def read_euluer_sodukus(filepath):
@@ -167,6 +173,6 @@ for soduku_puzzle in soduku_puzzles:
 
 
                 soduku_nodes[-1] = soduku_nodes[-1][:-1]
-    np.savetxt('Grid{}_solution.txt'.format(puzzle_number),variable_map.astype(int), fmt='%i', delimiter=",")
+    np.savetxt('solutions/Grid{}_solution.txt'.format(puzzle_number),variable_map.astype(int), fmt='%i', delimiter=",")
     puzzle_number += 1
 print (time.time() - start)
