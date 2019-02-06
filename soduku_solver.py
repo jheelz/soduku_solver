@@ -55,8 +55,13 @@ def read_euluer_sodukus(filepath):
 
 #return x,y coordinates of ith soduku node
 def placement(x):
-    row = (x + 9)/9 - 1
-    col = x % 9
+    #handles special case of 81st soduku node
+    if x == 81:
+        row = 8
+        col = 8
+    else:
+        row = (x + 9)/9 - 1
+        col = x % 9
     return [row,col]
 
 #returns child node based off of available soduku moves available; these are not necessarily "legal"
@@ -121,17 +126,8 @@ for soduku_puzzle in soduku_puzzles:
     soduku_cells_filled = 0
 
     #start solving soduku in iterative python friendly way
+    #if we've filled in 81 soduku squares we've completed the puzzle
     while soduku_cells_filled < 81:
-
-        #BREAK IF SOLVED SOLVED.
-        #HANDLES SPECIAL CASE OF FILLING IN LAST SODUKU ENTRY
-        #ANNOYING BUT IT WORKS
-        if soduku_cells_filled == 80:
-            for key, value in soduku_entrys_left.items():
-                if value > 0:
-
-                    variable_map[8,8] = key
-            break
 
         if is_legal(soduku_nodes[soduku_cells_filled]):
 
